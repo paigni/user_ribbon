@@ -1,4 +1,4 @@
 from django.contrib import admin
-from ribbon.models import Post, Profile
+from ribbon.models import Post
 
-admin.site.register(Post,Profile)
+admin.site.register(Post)
