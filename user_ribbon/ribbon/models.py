@@ -2,20 +2,14 @@ from django.db import models
 from django.utils import timezone
 from django.contrib.auth.models import User
 from django.urls import reverse
-from PIL import Image
 
 
 class Post(models.Model):
-    title = models.CharField(max_length=100)
+    author = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Автор')
+    title = models.CharField(max_length=100, verbose_name='Заголовок')
     content = models.TextField()
-    date_posted = models.DateTimeField(default=timezone.now)
-    author = models.ForeignKey(User, on_delete=models.CASCADE)
-    image = models.ImageField(default='default.jpg', upload_to='profile_pics')
-
-    def save(self):
-        super().save()
-
-        img = Image.open(self.image.path)
+    date_posted = models.DateTimeField(default=timezone.now, verbose_name='Дата публикации')
+    image = models.ImageField(default='default.jpg', upload_to='profile_pics', verbose_name='Картинка')
 
     def __str__(self):
         return self.title
@@ -24,19 +18,3 @@ class Post(models.Model):
         return reverse('post-detail', kwargs={'pk': self.pk})
 
 
-class Profile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    image = models.ImageField(default='default.jpg', upload_to='profile_pics')
-
-    def __str__(self):
-        return f'{self.user.username} Profile'
-
-    def save(self):
-        super().save()
-
-        img = Image.open(self.image.path)
-
-        if img.height > 300 or img.width > 300:
-            output_size = (300, 300)
-            img.thumbnail(output_size)
-            img.save(self.image.path)
