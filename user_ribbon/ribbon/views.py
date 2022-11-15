@@ -7,14 +7,16 @@ from django.views.generic import (
     CreateView,
     UpdateView,
     DeleteView
-)
+    )
 from ribbon.models import Post
-from ribbon.forms import UserRegisterForm,\
-    UserUpdateForm,\
-    ProfileUpdateForm
+from ribbon.forms import (
+    UserRegisterForm,
+    UserUpdateForm,
+    )
 
 
 def register(request):
+    template_name = 'ribbon/register.html'
     if request.method == 'POST':
         form = UserRegisterForm(request.POST)
         if form.is_valid():
@@ -24,43 +26,39 @@ def register(request):
             return redirect('login')
     else:
         form = UserRegisterForm()
-    return render(request, 'users/register.html', {'form': form})
+    return render(request, template_name, {'form': form})
 
-@login_required
+
 def profile(request):
+    template_name = 'ribbon/profile.html'
     if request.method == 'POST':
         u_form = UserUpdateForm(request.POST, instance=request.user)
-        p_form = ProfileUpdateForm(request.POST,
-                                   request.FILES,
-                                   instance=request.user.profile)
-        if u_form.is_valid() and p_form.is_valid():
+        if u_form.is_valid():
             u_form.save()
-            p_form.save()
             messages.success(request, f'Ваш профиль успешно обновлен.')
             return redirect('profile')
 
     else:
         u_form = UserUpdateForm(instance=request.user)
-        p_form = ProfileUpdateForm(instance=request.user.profile)
 
     context = {
         'u_form': u_form,
-        'p_form': p_form
     }
 
-    return render(request, 'users/profile.html', context)
+    return render(request, template_name, context)
 
 
 def home(request):
+    template_name = 'ribbon/home.html'
     context = {
         'posts': Post.objects.all()
     }
-    return render(request, 'blog/home.html', context)
+    return render(request, template_name, context)
 
 
 class PostListView(ListView):
     model = Post
-    template_name = 'blog/home.html'
+    template_name = 'ribbon/home.html'
     context_object_name = 'posts'
     ordering = ['-date_posted']
 
@@ -105,4 +103,4 @@ class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 
 
 def about(request):
-    return render(request, 'blog/about.html', {'title': 'О нас'})
+    return render(request, 'about.html', {'title': 'О нас'})
