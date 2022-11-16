@@ -1,6 +1,11 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import (
+    render,
+    redirect,
+    get_object_or_404
+    )
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.contrib.auth.models import User
 from django.views.generic import (
     ListView,
     DetailView,
@@ -10,8 +15,7 @@ from django.views.generic import (
     )
 from ribbon.models import Post
 from ribbon.forms import (
-    UserRegisterForm,
-    UserUpdateForm,
+    UserRegisterForm
     )
 
 
@@ -27,25 +31,6 @@ def register(request):
     else:
         form = UserRegisterForm()
     return render(request, template_name, {'form': form})
-
-
-def profile(request):
-    template_name = 'ribbon/profile.html'
-    if request.method == 'POST':
-        u_form = UserUpdateForm(request.POST, instance=request.user)
-        if u_form.is_valid():
-            u_form.save()
-            messages.success(request, f'Ваш профиль успешно обновлен.')
-            return redirect('profile')
-
-    else:
-        u_form = UserUpdateForm(instance=request.user)
-
-    context = {
-        'u_form': u_form,
-    }
-
-    return render(request, template_name, context)
 
 
 def home(request):
@@ -69,38 +54,20 @@ class PostDetailView(DetailView):
 
 class PostCreateView(LoginRequiredMixin, CreateView):
     model = Post
-    fields = ['title', 'content']
+    fields = ['title', 'content', 'image']
 
     def form_valid(self, form):
         form.instance.author = self.request.user
         return super().form_valid(form)
 
 
-class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+class UserPostListView(ListView):
     model = Post
-    fields = ['title', 'content']
+    template_name = 'blog/user_posts.html'
+    context_object_name = 'posts'
+    paginate_by = 5
 
-    def form_valid(self, form):
-        form.instance.author = self.request.user
-        return super().form_valid(form)
+    def get_queryset(self):
+        user = get_object_or_404(User, username=self.kwargs.get('username'))
+        return Post.objects.filter(author=user).order_by('-date_posted')
 
-    def test_func(self):
-        post = self.get_object()
-        if self.request.user == post.author:
-            return True
-        return False
-
-
-class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
-    model = Post
-    success_url = '/'
-
-    def test_func(self):
-        post = self.get_object()
-        if self.request.user == post.author:
-            return True
-        return False
-
-
-def about(request):
-    return render(request, 'about.html', {'title': 'О нас'})
