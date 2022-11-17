@@ -38,11 +38,17 @@
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'logout' %}">Выход</a>
                     </li> 
+                {% else %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'register' %}">Вход/Регистрация</a>
+                </li>
                 {% endif %}
             </ul>
             </div>
         </nav>
     </header>
+    {% block content %}
+    {% endblock %}
     <!-- Дополнительные скрипты JavaScript -->
     <!-- Сначала jQuery, затем Popper.js, последним Bootstrap JS -->
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
