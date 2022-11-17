@@ -11,7 +11,8 @@ from django.views.generic import (
     DetailView,
     CreateView,
     UpdateView,
-    DeleteView
+    DeleteView,
+    View,
     )
 from ribbon.models import Post
 from ribbon.forms import (
@@ -19,26 +20,19 @@ from ribbon.forms import (
     )
 
 
-def register(request):
-    template_name = 'ribbon/register.html'
-    if request.method == 'POST':
-        form = UserRegisterForm(request.POST)
-        if form.is_valid():
-            form.save()
-            username = form.cleaned_data.get('username')
-            messages.success(request, f'Ваш аккаунт создан: можно войти на сайт.')
-            return redirect('login')
-    else:
-        form = UserRegisterForm()
-    return render(request, template_name, {'form': form})
-
-
-def home(request):
-    template_name = 'ribbon/home.html'
-    context = {
-        'posts': Post.objects.all()
-    }
-    return render(request, template_name, context)
+class RegisterView(View):
+    def register(self, request):
+        template_name = 'ribbon/register.html'
+        if request.method == 'POST':
+            form = UserRegisterForm(request.POST)
+            if form.is_valid():
+                form.save()
+                username = form.cleaned_data.get('username')
+                messages.success(request, f'Ваш аккаунт создан: можно войти на сайт.')
+                return redirect('login')
+        else:
+            form = UserRegisterForm()
+        return render(request, template_name, {'form': form})
 
 
 class PostListView(ListView):
@@ -63,7 +57,7 @@ class PostCreateView(LoginRequiredMixin, CreateView):
 
 class UserPostListView(ListView):
     model = Post
-    template_name = 'blog/user_posts.html'
+    template_name = 'blog/user-posts.html'
     context_object_name = 'posts'
     paginate_by = 5
 
