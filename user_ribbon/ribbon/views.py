@@ -18,6 +18,7 @@ from ribbon.models import Post
 from ribbon.forms import (
     UserRegisterForm
     )
+from django.http import HttpResponse
 
 
 class RegisterView(View):
@@ -34,7 +35,9 @@ class RegisterView(View):
             username = form.cleaned_data.get('username')
             messages.success(request, f'Ваш аккаунт создан: можно войти на сайт.')
             return redirect('login')
-
+        else:
+            messages.error(request, 'Your account is disabled')
+            return render(request, 'ribbon/register.html', {'form': form})
 
 class PostListView(ListView):
     model = Post
